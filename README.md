@@ -1,5 +1,3 @@
-# ggplateplus <img src='man/figures/logo.png' align="right" width="12.5%" />
-
 <!-- badges: start -->
 <!-- badges: end -->
 
