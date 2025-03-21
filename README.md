@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 ## ggplateplus
-=======
->>>>>>> 8c920fba4f72eccaa102f2cd176708cd8a34f925
+
 <!-- badges: start -->
 <!-- badges: end -->
 
@@ -65,13 +63,6 @@ In order to use **ggplateplus** you have to load the package in your R environme
 
 ```r
 # Load ggplateplus package
-library(ggplateplus)
-```
-
-For the examples in this README, we'll use the ggplateplus package:
-
-```r
-# Library already loaded, but shown for clarity
 library(ggplateplus)
 ```
 
