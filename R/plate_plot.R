@@ -5,8 +5,11 @@
 #'
 #' @param data a data frame that contains at least a column with plate position information and a column with values or
 #' labels.
-#' @param position a character column in the `data` data frame that contains plate positions. These should be in the format:
-#' row = letter, column = number. So for example A1, D12 etc.
+#' @param position a character column in the `data` data frame that contains plate positions.
+#' @param position_format a character string specifying the format of position values. Options include:
+#'   - "letter_number" (default): positions like A1, B2, C3 (row = letter, column = number)
+#'   - "number" (or "numeric"): positions like 1, 2, 3, ... (sequential numbering from top-left)
+#'   - "row_column" (or "numeric_numeric"): positions like 1_1, 1_2, 2_1 (row_column as numbers)
 #' @param value a character or numeric column in the `data` data frame that contains values that should be plotted as colours
 #' on the plate layout. Can be the same column as `label`.
 #' @param label a character or numeric column in the `data` data frame that contains values that should be plotted as labels
@@ -112,12 +115,44 @@
 #'   silent = FALSE
 #' )
 #'
+#' # New in ggplateplus: Alternative position formats
+#' 
+#' # Using alternative position format: numeric positions
+#' # This requires your input data to have positions as sequential numbers
+#' # For a 6-well plate, positions would be 1-6
+#' data_numeric <- data_discrete_6
+#' data_numeric$position_num <- 1:6  # Create sequential position column
+#'
+#' plate_plot(
+#'   data = data_numeric,
+#'   position = position_num,  # Use the numeric position column
+#'   value = Condition,
+#'   plate_size = 6,
+#'   position_format = "number"  # Specify the position format
+#' )
+#'
+#' # Using alternative position format: row_column format
+#' # This requires your input data to have positions as "row_column" strings
+#' # For a 6-well plate with 2 rows and 3 columns, positions would be:
+#' # "1_1", "1_2", "1_3", "2_1", "2_2", "2_3"
+#' data_row_col <- data_discrete_6
+#' data_row_col$position_rc <- c("1_1", "1_2", "1_3", "2_1", "2_2", "2_3")
+#'
+#' plate_plot(
+#'   data = data_row_col,
+#'   position = position_rc,  # Use the row_column position column
+#'   value = Condition,
+#'   plate_size = 6,
+#'   position_format = "row_column"  # Specify the position format
+#' )
+#'
 plate_plot <- function(data,
                        position,
                        value,
                        label,
                        plate_size = 96,
                        plate_type = "square",
+                       position_format = "letter_number",
                        colour,
                        limits,
                        title,
@@ -129,6 +164,11 @@ plate_plot <- function(data,
                        scale) {
   if (!plate_size %in% c(6, 12, 24, 48, 96, 384, 1536)) {
     stop("Selected plate_size not available!")
+  }
+  
+  valid_formats <- c("letter_number", "number", "numeric", "row_column", "numeric_numeric")
+  if (!position_format %in% valid_formats) {
+    stop(paste0("Invalid position_format. Valid options are: ", paste(valid_formats, collapse = ", ")))
   }
 
   if (missing(scale)) {
@@ -225,15 +265,9 @@ plate_plot <- function(data,
 
   MORELETTERS <- c(LETTERS, "AA", "AB", "AC", "AD", "AE", "AF")
 
+  # Initialize data_prep without position extraction yet
   data_prep <- data |>
-    dplyr::ungroup() |>
-    dplyr::mutate(
-      row = stringr::str_extract({{ position }}, pattern = "[:upper:]+"),
-      col = as.numeric(stringr::str_extract({{ position }}, pattern = "\\d+")),
-      row_num = as.numeric(match(.data$row, MORELETTERS)),
-      colours = data_colours,
-      label_colours = label_col
-    )
+    dplyr::ungroup()
 
   if (!is.numeric(dplyr::pull(data, {{ value }}))) {
     # Convert character values to factors
@@ -435,6 +469,44 @@ plate_plot <- function(data,
     }
   }
 
+  # Handle different position formats now that plate parameters (n_rows, n_cols) are defined
+  if (position_format == "letter_number") {
+    # Original format: A1, B2, etc.
+    data_prep <- data_prep |>
+      dplyr::mutate(
+        row = stringr::str_extract({{ position }}, pattern = "[:upper:]+"),
+        col = as.numeric(stringr::str_extract({{ position }}, pattern = "\\d+")),
+        row_num = as.numeric(match(.data$row, MORELETTERS)),
+        colours = data_colours,
+        label_colours = label_col
+      )
+  } else if (position_format %in% c("number", "numeric")) {
+    # Sequential numbering: 1, 2, 3, ... (counted from top-left)
+    data_prep <- data_prep |>
+      dplyr::mutate(
+        pos_num = as.numeric({{ position }}),
+        # Calculate row and column from sequential position
+        row_num = ceiling(.data$pos_num / n_cols),
+        col = ((.data$pos_num - 1) %% n_cols) + 1,
+        # For display purposes, convert row_num to letter
+        row = MORELETTERS[.data$row_num],
+        colours = data_colours,
+        label_colours = label_col
+      )
+  } else if (position_format %in% c("row_column", "numeric_numeric")) {
+    # Format: "1_1", "1_2", etc.
+    data_prep <- data_prep |>
+      dplyr::mutate(
+        # Extract row and column from string like "1_1"
+        row_num = as.numeric(stringr::str_extract({{ position }}, pattern = "^\\d+")),
+        col = as.numeric(stringr::str_extract({{ position }}, pattern = "\\d+$")),
+        # For display purposes, convert row_num to letter
+        row = MORELETTERS[.data$row_num],
+        colours = data_colours,
+        label_colours = label_col
+      )
+  }
+  
   # Update row number to be reversed
   # This depends on the n_rows variable, which depends on the plate size
   data_prep <- data_prep |>

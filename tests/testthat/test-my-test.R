@@ -179,3 +179,48 @@ test_that("plate_plot works", {
   expect_s3_class(plot_9, "ggplot")
   expect_error(print(plot_9), NA)
 })
+
+# Test alternative position formats
+test_that("plate_plot works with alternative position formats", {
+  # Create test data with different position formats
+  data_numeric <- data_discrete_6 %>%
+    dplyr::mutate(position_num = 1:6)
+  
+  data_row_col <- data_discrete_6 %>%
+    dplyr::mutate(position_rc = c("1_1", "1_2", "1_3", "2_1", "2_2", "2_3"))
+  
+  # Test numeric position format
+  plot_numeric <- plate_plot(
+    data = data_numeric,
+    position = position_num,
+    value = Condition,
+    plate_size = 6,
+    position_format = "number"
+  )
+  
+  expect_s3_class(plot_numeric, "ggplot")
+  expect_error(print(plot_numeric), NA)
+  
+  # Test row_column position format
+  plot_row_col <- plate_plot(
+    data = data_row_col,
+    position = position_rc,
+    value = Condition,
+    plate_size = 6,
+    position_format = "row_column"
+  )
+  
+  expect_s3_class(plot_row_col, "ggplot")
+  expect_error(print(plot_row_col), NA)
+  
+  # Test invalid position format
+  expect_error(
+    plate_plot(
+      data = data_discrete_6,
+      position = well,
+      value = Condition,
+      plate_size = 6,
+      position_format = "invalid_format"
+    )
+  )
+})

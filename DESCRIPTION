@@ -1,12 +1,17 @@
-Package: ggplate
-Title: Create Layout Plots of Biological Culture Plates and Microplates
-Version: 0.1.5
-Authors@R: person(given = "Jan-Philipp",
-           family = "Quast",
+Package: ggplateplus
+Title: Enhanced Layout Plots of Biological Culture Plates and Microplates with Multiple Position Formats
+Version: 0.1.0
+Authors@R: c(
+    person(given = "Your",
+           family = "Name",
            role = c("aut", "cre"),
+           email = "your.email@example.com"),
+    person(given = "Jan-Philipp",
+           family = "Quast",
+           role = c("aut"),
            email = "quast@imsb.biol.ethz.ch",
-           comment = c(ORCID = "0000-0003-2713-778X"))
-Description: Enables users to create simple plots of biological culture plates as well as microplates. Both continuous and discrete values can be plotted onto the plate layout. 
+           comment = c(ORCID = "0000-0003-2713-778X")))
+Description: A fork of the ggplate package with enhanced functionality including support for multiple well position formats. Enables users to create simple plots of biological culture plates as well as microplates using various well position naming schemes. Both continuous and discrete values can be plotted onto the plate layout.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -22,13 +27,15 @@ Imports:
     tidyr,
     utils,
     forcats,
-    farver
+    farver,
+    tools
 Suggests: 
     covr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    readxl,
+    writexl
 Depends: 
     R (>= 4.1.0)
-URL: https://github.com/jpquast/ggplate,
-    https://jpquast.github.io/ggplate/
-BugReports: https://github.com/jpquast/ggplate/issues
+URL: https://github.com/your-username/ggplateplus
+BugReports: https://github.com/your-username/ggplateplus/issues
 Config/testthat/edition: 3

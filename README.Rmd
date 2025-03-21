@@ -13,15 +13,42 @@ knitr::opts_chunk$set(
 )
 ```
 
-# ggplate <img src='man/figures/logo.png' align="right" width="12.5%" />
+# ggplateplus <img src='man/figures/logo.png' align="right" width="12.5%" />
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/ggplate)](https://CRAN.R-project.org/package=ggplate)
-[![R-CMD-check](https://github.com/jpquast/ggplate/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jpquast/ggplate/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/jpquast/ggplate/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jpquast/ggplate?branch=main)
 <!-- badges: end -->
 
-The goal of the **ggplate** package is to enable users to create simple plots of biological culture plates as well as microplates. Both continuous and discrete values can be plotted onto the plate layout. 
+The **ggplateplus** package is a fork of the [ggplate](https://github.com/jpquast/ggplate) package with enhanced functionality. It enables users to create simple plots of biological culture plates as well as microplates with support for multiple well position naming formats. Both continuous and discrete values can be plotted onto the plate layout.
+
+## New Features
+
+The key enhancements in ggplateplus compared to the original ggplate package include:
+
+* **Multiple Well Position Formats**: Support for different types of well naming schemes:
+  - Traditional letter-number format (A1, B2, etc.)
+  - Sequential numbering (1, 2, 3, etc.)
+  - Row-column notation (1_1, 1_2, etc.)
+
+* **Flexible Data Import/Export**: Read and write plate layouts in various formats:
+  - Import from CSV, TSV, and Excel files
+  - Support for separate row/column fields (common in lab data)
+  - Automatic format detection
+  - Multi-plate dataset handling
+  - Export to various file formats with optional position splitting
+
+* **Plate Map Creation**: Generate plate layout templates for experiment setup:
+  - Create empty plate maps for any plate size
+  - Support for all position formats
+  - Custom starting positions
+  - Options to include specific subsets of wells
+
+* **Faceted Multi-Plate Display**: Compare multiple plates side by side:
+  - Create faceted plots for different conditions, timepoints, or replicates
+  - Customize facet layout and scales
+  - Common or separate legends
+  - Full compatibility with all plate_plot options
+
+This makes the package more compatible with various lab automation systems and data formats and provides tools for both experiment planning and data visualization.
 
 Currently the package supports the following plate sizes:
 
@@ -36,35 +63,28 @@ Currently the package supports the following plate sizes:
 
 ## Installation
 
-**ggplate** is implemented as an R package. 
-
-You can install the release version from [CRAN](https://CRAN.R-project.org/package=ggplate) using the `install.packages()` function.
-
-``` r
-install.packages("ggplate")
-```
-
-You can install the development version from [GitHub](https://github.com/jpquast/ggplate) using the [`devtools`](https://github.com/r-lib/devtools) package by copying the following commands into R:
+**ggplateplus** is currently only available from GitHub. You can install it using the [`devtools`](https://github.com/r-lib/devtools) package:
 
 Note: If you do not have `devtools` installed make sure to do so by removing the comment sign (#).
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jpquast/ggplate")
-```
-
-In addition, you can install it via the command line through `conda` since it is also implemented as a [conda-forge package](https://anaconda.org/conda-forge/r-ggplate).
-
-```
-conda install -c conda-forge r-ggplate
+devtools::install_github("your-username/ggplateplus")
 ```
 
 ## Usage
 
-In order to use **ggplate** you have to load the package in your R environment by simply calling the `library()` function as shown bellow.
+In order to use **ggplateplus** you have to load the package in your R environment by simply calling the `library()` function as shown below.
 
-```{r load_package, message=FALSE, warning=FALSE}
-# Load ggplate package
+```{r load_package, message=FALSE, warning=FALSE, eval=FALSE}
+# Load ggplateplus package
+library(ggplateplus)
+```
+
+For the examples in this README, we'll use the original ggplate package:
+
+```{r actual_load, message=FALSE, warning=FALSE}
+# For README examples only
 library(ggplate)
 ```
 
@@ -79,6 +99,123 @@ str(data_continuous_96)
 ```
 
 When calling the `str()` function you can see that the data frame of a continuous 96-well plate dataset only contains two columns. The `Value` column contains values associated with each of the plate wells, while the `well` column contains the corresponding well positions using a combination of **alphabetic row names** and **numeric column names**.
+
+### Well Position Formats
+
+The package supports multiple well position naming schemes through the `position_format` parameter:
+
+1. **letter_number** (default): positions like A1, B2, C3 (row = letter, column = number)
+2. **number** (or **numeric**): positions like 1, 2, 3, ... (sequential numbering from top-left)
+3. **row_column** (or **numeric_numeric**): positions like 1_1, 1_2, 2_1 (row_column as numbers)
+
+For example, if your data uses sequential numbering:
+
+```{r, eval=FALSE}
+# Example with numeric positions (1, 2, 3, etc.)
+data_numeric <- data.frame(
+  position = 1:96,  # Sequential numbers 1-96
+  Value = rnorm(96, mean = 1, sd = 0.5)
+)
+
+plate_plot(
+  data = data_numeric,
+  position = position,
+  value = Value,
+  plate_size = 96,
+  position_format = "number"  # Specify the position format
+)
+```
+
+Or if your data uses row_column format:
+
+```{r, eval=FALSE}
+# Example with row_column positions (1_1, 1_2, etc.)
+# Generate row_column positions for a 96-well plate (8 rows, 12 columns)
+row_col_positions <- c()
+for(r in 1:8) {
+  for(c in 1:12) {
+    row_col_positions <- c(row_col_positions, paste0(r, "_", c))
+  }
+}
+
+data_row_col <- data.frame(
+  position = row_col_positions,
+  Value = rnorm(96, mean = 1, sd = 0.5)
+)
+
+plate_plot(
+  data = data_row_col,
+  position = position,
+  value = Value,
+  plate_size = 96,
+  position_format = "row_column"  # Specify the position format
+)
+```
+
+### Creating Plate Maps
+
+The `create_plate_map()` function allows you to generate empty plate templates with well positions in any of the supported formats. This is useful for experiment planning and setting up data collection templates.
+
+```{r, eval=FALSE}
+# Create a standard 96-well plate map with letter-number positions
+plate_map_96 <- create_plate_map(plate_size = 96)
+head(plate_map_96)
+#>   position
+#> 1       A1
+#> 2       A2
+#> 3       A3
+#> 4       A4
+#> 5       A5
+#> 6       A6
+
+# Create a 24-well plate map with numeric positions
+plate_map_24_num <- create_plate_map(
+  plate_size = 24, 
+  position_format = "number"
+)
+head(plate_map_24_num)
+#>   position
+#> 1        1
+#> 2        2
+#> 3        3
+#> 4        4
+#> 5        5
+#> 6        6
+
+# Create a 6-well plate with row_column positions
+plate_map_6_rc <- create_plate_map(
+  plate_size = 6, 
+  position_format = "row_column"
+)
+plate_map_6_rc
+#>   position
+#> 1      1_1
+#> 2      1_2
+#> 3      1_3
+#> 4      2_1
+#> 5      2_2
+#> 6      2_3
+
+# Create a partial plate map starting from position C3
+plate_map_subset <- create_plate_map(
+  plate_size = 24, 
+  start_position = "C3",
+  include_all = FALSE
+)
+head(plate_map_subset)
+#>   position
+#> 1       C3
+#> 2       C4
+#> 3       C5
+#> 4       C6
+#> 5       D3
+#> 6       D4
+```
+
+The generated plate maps can be used:
+- As templates for data collection
+- To create experiment layouts and pipetting schemes
+- As inputs for the `plate_plot()` function when combined with your experimental data
 
 You can use this example data frame to create a 96-well plate layout plot using the `plate_plot()` function and setting the `plate_size` argument to `96`. There are currently two options for the plate well type. These can be either `"round"` or `"square"`. In the plot below we specify `"round"`, while `"square"` is the default value when the `plate_type` argument is not provided.
 
@@ -201,6 +338,69 @@ plate_plot(
 )
 ```
 
+### Faceted Multi-Plate Display
+
+The `multi_plate_plot()` function allows you to create faceted displays of multiple plates, making it easy to compare different conditions, time points, or replicates side by side.
+
+```{r, eval=FALSE}
+library(dplyr)
+
+# Create a dataset with multiple conditions
+data(data_continuous_96)
+
+# Create a multi-condition dataset
+conditions <- c("Control", "Treatment A", "Treatment B")
+multi_condition_data <- lapply(conditions, function(condition) {
+  data_continuous_96 %>%
+    mutate(
+      Condition = condition,
+      # Add some variation between conditions
+      Value = Value * case_when(
+        condition == "Control" ~ 1,
+        condition == "Treatment A" ~ 1.5,
+        condition == "Treatment B" ~ 0.7
+      )
+    )
+}) %>%
+  bind_rows()
+
+# Create a faceted plot with the different conditions
+multi_plate_plot(
+  data = multi_condition_data,
+  position = well,
+  value = Value,
+  facet_by = Condition,  # This is the column to facet by
+  plate_size = 96,
+  plate_type = "round"
+)
+```
+
+This creates a display with three plates side by side, each showing a different condition. You can customize the facet layout:
+
+```{r, eval=FALSE}
+# Create a faceted plot with custom layout and scales
+multi_plate_plot(
+  data = multi_condition_data,
+  position = well,
+  value = Value,
+  facet_by = Condition,
+  plate_size = 96,
+  plate_type = "round",
+  facet_ncol = 2,           # Arrange facets in 2 columns
+  facet_scales = "free",    # Allow scales to vary between facets
+  label = Value,            # Add value labels to wells
+  common_legend = TRUE      # Use a single legend for all facets
+)
+```
+
+The faceted display is particularly useful for:
+- Comparing treatments or conditions
+- Visualizing time course experiments
+- Displaying multiple replicates
+- Comparing different normalization methods
+
+All options available in `plate_plot()` can be used with `multi_plate_plot()`, giving you complete flexibility in how you visualize your plate data.
+
 ## Plot Customisation
 
 You can further customise your plot in various ways. Lets take a discrete 6-well plate dataset as an example. This dataset only contains three categories assigned to the six wells of the plate. This could be for example a pipetting scheme of an experiment.
@@ -262,6 +462,110 @@ plate_plot(
   label_size = 4
 )
 ```
+
+### Plate Data Import and Export
+
+ggplateplus provides functions for importing and exporting plate layout data in various formats, making it compatible with data generated by different lab equipment and software systems.
+
+#### Importing Plate Data
+
+The `import_plate_layout()` function can read data from CSV, TSV, and Excel files with flexible position format handling:
+
+```{r plate_import, eval=FALSE}
+# Basic import from CSV with automatic detection
+plate_data <- import_plate_layout("path/to/data.csv")
+
+# Import with explicit columns
+plate_data <- import_plate_layout(
+  "path/to/data.csv", 
+  value_column = "signal_intensity",
+  position_column = "well_id"
+)
+
+# Import from Excel with specific sheet
+plate_data <- import_plate_layout(
+  "path/to/experiment.xlsx", 
+  sheet = "Day1"
+)
+```
+
+The function supports data with separate row and column fields (common in lab-generated files):
+
+```{r separate_fields, eval=FALSE}
+# Import with separate row and column fields (e.g., from lab equipment)
+# Example: data with 'plate_row' (A, B, C...) and 'plate_column' (1, 2, 3...) columns
+plate_data <- import_plate_layout(
+  "path/to/lab_data.csv",
+  row_column = c("plate_row", "plate_column"),
+  row_is_numeric = FALSE  # rows are letters in this example
+)
+
+# Example: data with numeric rows (1, 2, 3...) and columns (1, 2, 3...)
+plate_data <- import_plate_layout(
+  "path/to/robot_data.csv",
+  row_column = c("row", "column"),
+  row_is_numeric = TRUE  # rows are numbers in this example
+)
+```
+
+It also handles multi-plate datasets:
+
+```{r multi_plate_import, eval=FALSE}
+# Import data with multiple plates
+multi_plate_data <- import_plate_layout(
+  "path/to/experiment_series.csv",
+  plate_column = "plate_id"
+)
+```
+
+You can convert between position formats during import:
+
+```{r position_conversion, eval=FALSE}
+# Import data with letter-number positions (A1, B2...) but convert to numeric
+numeric_data <- import_plate_layout(
+  "path/to/standard_data.csv",
+  position_format = "number"  # Convert to sequential numbers
+)
+
+# Import data with numeric positions but convert to row_column
+rc_data <- import_plate_layout(
+  "path/to/numeric_data.csv",
+  position_format = "row_column"  # Convert to row_column format (1_1, 1_2...)
+)
+```
+
+#### Exporting Plate Data
+
+The `export_plate_layout()` function allows you to save plate data to various file formats:
+
+```{r plate_export, eval=FALSE}
+# Basic export to CSV
+export_plate_layout(plate_data, "output_data.csv")
+
+# Export to Excel
+export_plate_layout(plate_data, "output_data.xlsx")
+
+# Export with position splitting (creates separate row/column fields)
+export_plate_layout(
+  plate_data, 
+  "output_for_robot.csv", 
+  split_position = TRUE
+)
+
+# Export with specific column names
+export_plate_layout(
+  plate_data, 
+  "custom_output.csv",
+  position_column = "well_position",
+  value_column = "measurement"
+)
+```
+
+This import/export functionality makes ggplateplus compatible with data from various sources, including:
+- Laboratory information management systems (LIMS)
+- Plate readers and liquid handling robots
+- Custom laboratory software
+- Manual data collection templates
 
 ## Potential Issues
 

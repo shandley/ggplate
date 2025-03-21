@@ -1,4 +1,4 @@
 library(testthat)
-library(ggplate)
+library(ggplateplus)
 
-test_check("ggplate")
+test_check("ggplateplus")
