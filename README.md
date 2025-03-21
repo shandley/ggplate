@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 ## ggplateplus
+=======
+>>>>>>> 8c920fba4f72eccaa102f2cd176708cd8a34f925
 <!-- badges: start -->
 <!-- badges: end -->
 
