@@ -1,4 +1,4 @@
-# ggplateplus
+## ggplateplus
 <!-- badges: start -->
 <!-- badges: end -->
 
