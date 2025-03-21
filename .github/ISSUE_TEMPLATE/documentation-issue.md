@@ -3,7 +3,7 @@ name: Documentation Issue
 about: Create a report to help us improve our documentation
 title: ''
 labels: documentation
-assignees: jpquast
+assignees: shandley
 
 ---
 

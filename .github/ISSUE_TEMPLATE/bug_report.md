@@ -3,7 +3,7 @@ name: Bug report
 about: Create a report to help us improve
 title: ''
 labels: bug
-assignees: jpquast
+assignees: shandley
 
 ---
 
@@ -17,7 +17,7 @@ If you need to provide your own dataset, you can use the `dput()` function to tu
 
 ``` r
 # Load package for example data
-library(ggplate)
+library(ggplateplus)
 
 # Use example dataset to demonstrate use of dput
 data("data_continuous_12")

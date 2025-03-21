@@ -3,7 +3,7 @@ name: Questions or Feature Requests
 about: If you have questions or feature requests you can post them here.
 title: ''
 labels: ''
-assignees: jpquast
+assignees: shandley
 
 ---
 
