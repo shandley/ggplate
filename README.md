@@ -2,11 +2,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The **ggplateplus** package is a fork of the [ggplate](https://github.com/jpquast/ggplate) package with enhanced functionality. It enables users to create simple plots of biological culture plates as well as microplates with support for multiple well position naming formats. Both continuous and discrete values can be plotted onto the plate layout.
+The **ggplateplus** package enables users to create simple plots of biological culture plates as well as microplates with support for multiple well position naming formats. Both continuous and discrete values can be plotted onto the plate layout. It includes enhanced functionality for importing, exporting, and visualizing plate data.
 
 ## New Features
 
-The key enhancements in ggplateplus compared to the original ggplate package include:
+The key features in ggplateplus include:
 
 * **Multiple Well Position Formats**: Support for different types of well naming schemes:
   - Traditional letter-number format (A1, B2, etc.)
@@ -53,7 +53,7 @@ Note: If you do not have `devtools` installed make sure to do so by removing the
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("your-username/ggplateplus")
+devtools::install_github("shandley/ggplateplus")
 ```
 
 ## Usage
@@ -65,11 +65,11 @@ In order to use **ggplateplus** you have to load the package in your R environme
 library(ggplateplus)
 ```
 
-For the examples in this README, we'll use the original ggplate package:
+For the examples in this README, we'll use the ggplateplus package:
 
 ```r
-# For README examples only
-library(ggplate)
+# Library already loaded, but shown for clarity
+library(ggplateplus)
 ```
 
 There are multiple example datasets provided that can be used to create plots of each plate type. You can access these datasets using the `data()` function.
